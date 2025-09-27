@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Heheboi — 🔥</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-a:#07030a;
+    --bg-b:#2b0b06;
+    --card: rgba(255,255,255,0.03);
+    --accent1:#ff4200;
+    --accent2:#ff001f;
+    --text:#ffefea;
+    --muted:rgba(255,255,255,0.6);
+  }
+  html,body{height:100%;margin:0}
+  body{
+    font-family:"Poppins",system-ui,Arial;
+    background: linear-gradient(160deg,var(--bg-a), #19040a 60%, #2a0710);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow:hidden;
+  }
+
+  /* Canvas for effects covers whole screen */
+  canvas#fxCanvas{
+    position:fixed;
+    inset:0;
+    z-index:9998;
+    pointer-events:none;
+  }
+
+  /* Fire overlay */
+  .overlay {
+    position:fixed; inset:0; z-index:9997; pointer-events:none;
+    background: radial-gradient(circle at 10% 10%, rgba(255,120,40,0.03), transparent 12%),
+                radial-gradient(circle at 90% 70%, rgba(255,40,10,0.02), transparent 20%);
+    mix-blend-mode: screen;
+    opacity:0;
+    transition: opacity .9s ease;
+  }
+  .overlay.active{ opacity:1; }
+
+  /* Main card */
+  .card{
+    width:100%;
+    max-width:720px;
+    border-radius:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+    padding:28px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+    text-align:center;
+    position:relative;
+    z-index:9999;
+  }
+
+  /* top text & input */
+  .title{
+    font-family:"Orbitron",sans-serif;
+    font-size:18px;
+    margin:0 0 8px;
+    color:var(--accent1);
+    letter-spacing:0.6px;
+    text-shadow: 0 4px 18px rgba(255,80,20,0.08);
+  }
+  .subtitle{
+    font-size:14px; color:var(--muted); margin-bottom:16px;
+  }
+
+  .controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom:6px; }
+  input[type="password"]{
+    flex:1; padding:12px 14px; border-radius:10px; border:0; outline:none;
+    font-size:15px; background: rgba(0,0,0,0.25); color:var(--text);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
+  }
+  button#openBtn{
+    padding:12px 18px; border-radius:10px; border:0; cursor:pointer;
+    background: linear-gradient(90deg,var(--accent1), var(--accent2));
+    color:#120406; font-weight:800; font-size:14px;
+    box-shadow: 0 12px 30px rgba(255,60,20,0.12);
+    transition: transform .15s ease, filter .15s ease;
+  }
+  button#openBtn:active { transform:translateY(1px) scale(.995) }
+
+  .msg{ height:18px; color:#ff9b9b; margin-top:8px; font-size:13px; }
+
+  /* secret elements */
+  #resultArea{ display:none; margin-top:18px; }
+
+  .secretTitle{
+    font-family:"Orbitron",sans-serif;
+    font-size:32px;
+    line-height:1;
+    margin:10px 0;
+    letter-spacing:1px;
+    /* red-black split effect done with background-clip */
+    background: linear-gradient(90deg, #ff001f 0%, #0b0000 45%, #ff4b00 100%);
+    -webkit-background-clip: text;
+    background-clip:text;
+    color:transparent;
+    text-shadow: 0 12px 40px rgba(255,60,20,0.12);
+    transform-origin:center;
+    opacity:0;
+  }
+
+  .imgWrap{
+    margin-top:12px;
+    border-radius:14px;
+    overflow:hidden;
+    border:6px solid rgba(0,0,0,0.55);
+    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(255,30,0,0.02));
+    max-height:70vh;
+  }
+  img#thePic{
+    width:100%;
+    height:auto;
+    display:block;
+    transform: scale(.94) translateY(8px);
+    filter: saturate(.95) contrast(.96) drop-shadow(0 18px 40px rgba(0,0,0,0.6));
+    transition: transform .9s cubic-bezier(.18,.9,.32,1), filter .6s ease, opacity .6s ease;
+    opacity:0;
+  }
+
+  /* after reveal classes */
+  .revealed .secretTitle{ animation: titleIn .75s cubic-bezier(.2,.9,.2,1) forwards; }
+  .revealed img#thePic{ opacity:1; transform: scale(1) translateY(0); }
+
+  @keyframes titleIn{
+    0%{ transform: translateY(-18px) rotateX(10deg) scale(.92); opacity:0 }
+    60%{ transform: translateY(6px) rotateX(0deg) scale(1.02); opacity:1 }
+    100%{ transform: translateY(0) scale(1); opacity:1 }
+  }
+
+  /* subtle footer hint */
+  .hint{ margin-top:10px; font-size:13px; color:rgba(255,255,255,0.6) }
+
+  /* responsive */
+  @media (max-width:520px){
+    .secretTitle{ font-size:24px }
+    .card{ padding:18px }
+    .controls{ flex-direction:column }
+    button#openBtn{ width:100% }
+  }
+</style>
+</head>
+<body>
+  <!-- canvas for explosion/particles -->
+  <canvas id="fxCanvas"></canvas>
+  <div class="overlay" id="overlay"></div>
+
+  <div class="card" id="card">
+    <div class="title">Password daalo dost, aapse ek baat puchni hai</div>
+    <div class="subtitle">Type the pass and brace for fireworks 🔥</div>
+
+    <div class="controls" id="controls">
+      <input id="pw" type="password" placeholder="Enter password" autocomplete="off" />
+      <button id="openBtn" aria-label="Open">Open</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+
+    <div id="resultArea" aria-hidden="true">
+      <div class="secretTitle" id="secretTitle">Maa kaisi hai Teri?</div>
+      <div class="imgWrap">
+        <img id="thePic" src="funny_face.jpg" alt="private image" />
+      </div>
+      <div class="hint">Roast delivered. Share responsibly.</div>
+    </div>
+  </div>
+
+<script>
+/* ========= CONFIG ========= */
+const PASSWORD = 'bhootkimaakichut';
+const explosionColor = '#ff6a00';
+/* ========================== */
+
+/* DOM refs */
+const pw = document.getElementById('pw');
+const btn = document.getElementById('openBtn');
+const msg = document.getElementById('msg');
+const overlay = document.getElementById('overlay');
+const fxCanvas = document.getElementById('fxCanvas');
+const card = document.getElementById('card');
+const result = document.getElementById('resultArea');
+const secretTitle = document.getElementById('secretTitle');
+const thePic = document.getElementById('thePic');
+
+let cw, ch, ctx;
+
+/* Setup canvas */
+function resizeCanvas(){
+  fxCanvas.width = cw = window.innerWidth;
+  fxCanvas.height = ch = window.innerHeight;
+  ctx = fxCanvas.getContext('2d');
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+/* Particle system for explosion */
+function Particle(x,y, vx,vy, size, life, color){
+  this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+  this.size = size; this.life = life; this.ttl = life; this.color = color;
+}
+Particle.prototype.update = function(dt){
+  this.x += this.vx*dt;
+  this.y += this.vy*dt;
+  this.vy += 600 * dt; // gravity
+  this.size *= 0.98;
+  this.ttl -= dt;
+};
+Particle.prototype.draw = function(ctx){
+  const alpha = Math.max(0, this.ttl/this.life);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = this.color;
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, Math.max(1,this.size), 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+};
+
+let particles = [];
+let last = performance.now();
+
+function spawnExplosion(x,y, count=80){
+  for(let i=0;i<count;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = 180 + Math.random()*420;
+    const vx = Math.cos(angle)*speed;
+    const vy = Math.sin(angle)*speed * 0.8;
+    const size = 3 + Math.random()*8;
+    const life = 0.9 + Math.random()*1.1;
+    const r = Math.floor(200 + Math.random()*55);
+    const g = Math.floor(40 + Math.random()*160);
+    const b = Math.floor(0 + Math.random()*50);
+    const color = `rgb(${r},${g},${b})`;
+    particles.push(new Particle(x,y,vx,vy,size,life,color));
+  }
+  // ember sparks - small bright
+  for(let i=0;i<25;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = 80 + Math.random()*240;
+    const vx = Math.cos(angle)*speed;
+    const vy = Math.sin(angle)*speed*0.6;
+    const size = 1 + Math.random()*3;
+    const life = 0.8 + Math.random()*1.2;
+    particles.push(new Particle(x + (Math.random()-0.5)*20, y + (Math.random()-0.5)*20, vx, vy, size, life, 'rgba(255,210,120,1)'));
+  }
+}
+
+/* animate loop */
+function loop(t){
+  const now = t;
+  const dt = Math.min(0.04, (now - last)/1000);
+  last = now;
+  ctx.clearRect(0,0,cw,ch);
+
+  // draw particles
+  for(let i = particles.length-1; i>=0; i--){
+    const p = particles[i];
+    p.update(dt);
+    p.draw(ctx);
+    if(p.ttl <= 0 || p.size < 0.5) particles.splice(i,1);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* Screen shake util */
+function shake(duration = 550, strength = 12){
+  const start = performance.now();
+  function sframe(now){
+    const elapsed = now - start;
+    const t = elapsed/duration;
+    if(t >= 1){ card.style.transform = ''; return; }
+    const x = (Math.random()*2-1) * strength * (1-t);
+    const y = (Math.random()*2-1) * (strength*0.45) * (1-t);
+    card.style.transform = `translate(${x}px, ${y}px)`;
+    requestAnimationFrame(sframe);
+  }
+  requestAnimationFrame(sframe);
+}
+
+/* Ember float after reveal */
+function spawnFloatingEmbers(){
+  const body = document.body;
+  for(let i=0;i<14;i++){
+    const d = document.createElement('div');
+    d.style.position='fixed';
+    d.style.left = (10 + Math.random()*80) + '%';
+    d.style.top = (30 + Math.random()*50) + '%';
+    const size = 6 + Math.random()*12;
+    d.style.width = d.style.height = size + 'px';
+    d.style.borderRadius = '50%';
+    d.style.background = 'radial-gradient(circle, rgba(255,210,120,1), rgba(255,60,10,0.7))';
+    d.style.filter = 'blur(8px)';
+    d.style.opacity = 0.9;
+    d.style.pointerEvents = 'none';
+    d.style.zIndex = 9999;
+    body.appendChild(d);
+    const dx = (Math.random()-0.5)*200;
+    const dy = - (40 + Math.random()*140);
+    const dur = 2600 + Math.random()*2600;
+    d.animate([{ transform:'translate3d(0,0,0) scale(1)', opacity:1 }, { transform:`translate3d(${dx}px,${dy}px,0) scale(.4)`, opacity:0 }], { duration: dur, easing:'cubic-bezier(.2,.9,.2,1)'});
+    setTimeout(()=>d.remove(), dur+60);
+  }
+}
+
+/* main reveal sequence */
+function revealAtCenter(){
+  // explosion center roughly center of card
+  const rect = card.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2 - 10;
+  spawnExplosion(cx, cy, 120);
+  shake(700, 18);
+  overlay.classList.add('active');
+
+  // show secret after small delay
+  setTimeout(()=>{
+    result.style.display = 'block';
+    document.documentElement.scrollTop = 0;
+    // animate title + image
+    card.classList.add('revealed');
+    secretTitle.style.opacity = '1';
+    thePic.style.opacity = '1';
+    spawnFloatingEmbers();
+  }, 450);
+
+  // subtle extra sparks after
+  setTimeout(()=> spawnExplosion(cx + 60, cy - 20, 36), 700);
+  setTimeout(()=> spawnExplosion(cx - 80, cy + 40, 36), 900);
+}
+
+/* UI interaction */
+function tryOpen(){
+  msg.textContent = '';
+  const v = pw.value || '';
+  if(!v){ msg.textContent = 'Password daal bhai'; return; }
+  if(v !== PASSWORD){
+    msg.textContent = 'Wrong password';
+    pw.value = '';
+    card.animate([{ transform:'translateX(0)' }, { transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], { duration:260 });
+    return;
+  }
+
+  // Good: do cinematic reveal
+  // hide controls quickly
+  document.getElementById('controls').style.display = 'none';
+  document.querySelector('.title').style.opacity = '0';
+  document.querySelector('.subtitle').style.opacity = '0';
+
+  // play reveal fx
+  revealAtCenter();
+
+  // reveal actual image source: ensure image loads even if cached
+  thePic.onload = ()=> { /* nothing */ };
+  thePic.src = thePic.getAttribute('src'); // reassign to trigger load if needed
+}
+
+/* enter key */
+pw.addEventListener('keydown', e => { if(e.key === 'Enter') tryOpen(); });
+btn.addEventListener('click', tryOpen);
+
+</script>
+</body>
+</html>
