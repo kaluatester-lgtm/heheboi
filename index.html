@@ -37,19 +37,11 @@ body, html{
   flex:1;
   min-width:160px;
 }
+
+/* INPUT: unchanged except right padding slightly tuned */
 .controls input{
   width:100%;
-  padding:12px 36px 12px 16px; /* right space for small eye */
-  border-radius:12px;
-  border:2px solid #ff91a4;
-  font-size:15px;
-  outline:none;
-  box-sizing:border-box;
-  background:#fff;
-
-  .controls input{
-  width:100%;
-  padding:12px 36px 12px 16px; /* right side chhota space */
+  padding:12px 34px 12px 16px; /* small right padding so eye fits snug */
   border-radius:12px;
   border:2px solid #ff91a4;
   font-size:15px;
@@ -57,6 +49,32 @@ body, html{
   box-sizing:border-box;
   background:#fff;
 }
+
+/* SMALLER, EDGE-SNUG EYE BUTTON */
+.eye-btn{
+  position:absolute;
+  right:6px;                   /* flush toward right edge */
+  top:50%;
+  transform:translateY(-50%);
+  width:20px;                  /* SMALL */
+  height:20px;                 /* SMALL */
+  border:none;
+  background:transparent;      /* no background box */
+  padding:0;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.eye-btn svg{
+  width:16px;                  /* tiny icon */
+  height:16px;
+  display:block;
+  stroke:#7a2a3a;
+  stroke-width:1.4;
+}
+
+/* keep the existing button style exactly */
 .controls button{
   padding:12px 18px;
   border:none;
@@ -67,7 +85,7 @@ body, html{
   transition: transform 0.12s ease;
 }
 .controls button:active{ transform: translateY(1px); }
-.msg{ color:#ff6f91; font-size:3px; margin-top:10px; height:18px; }
+.msg{ color:#ff6f91; font-size:13px; margin-top:10px; height:18px; }
 .secret{
   display:none;
   margin-top:25px;
@@ -118,7 +136,7 @@ body, html{
         <div class="pw-wrap">
           <input id="pw" type="password" placeholder="Enter password" aria-label="Password">
           <button id="eyeBtn" class="eye-btn" aria-label="Show password" title="Show / hide password">
-            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
           </button>
         </div>
         <button id="openBtn">Click Password</button>
@@ -135,6 +153,7 @@ body, html{
   </div>
 
 <script>
+/* unchanged logic + tiny eye toggle behaviour */
 const PASSWORD='bhootkimaakichut';
 const pw=document.getElementById('pw');
 const btn=document.getElementById('openBtn');
@@ -148,14 +167,14 @@ const eyeIcon=document.getElementById('eyeIcon');
 let eyeVisible=false;
 
 const EYE_OPEN = `
-  <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#7a2a3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="12" cy="12" r="3" fill="#7a2a3a"/>
 `;
 const EYE_SLASH = `
-  <path d="M3 3l18 18" stroke="#7a2a3a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M10.58 10.58A3 3 0 0 0 13.42 13.42" stroke="#7a2a3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M2 12s4-7 10-7c2.04 0 3.92.48 5.5 1.32" stroke="#7a2a3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M21.47 16.11A15.95 15.95 0 0 0 22 12s-4 7-10 7a10.94 10.94 0 0 1-4.5-.9" stroke="#7a2a3a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M3 3l18 18" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10.58 10.58A3 3 0 0 0 13.42 13.42" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M2 12s4-7 10-7c2.04 0 3.92.48 5.5 1.32" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21.47 16.11A15.95 15.95 0 0 0 22 12s-4 7-10 7a10.94 10.94 0 0 1-4.5-.9" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
 `;
 eyeIcon.innerHTML=EYE_SLASH;
 
