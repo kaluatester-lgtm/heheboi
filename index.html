@@ -134,7 +134,8 @@ body, html{
       <div class="prompt">Password daalo dost, ek baat puchni hai</div>
       <div class="controls" id="controls">
         <div class="pw-wrap">
-          <input id="pw" type="password" placeholder="Enter password" aria-label="Password">
+          <!-- CHANGED: password is VISIBLE by default (type="text") -->
+          <input id="pw" type="text" placeholder="Enter password" aria-label="Password">
           <button id="eyeBtn" class="eye-btn" aria-label="Show password" title="Show / hide password">
             <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
           </button>
@@ -153,7 +154,7 @@ body, html{
   </div>
 
 <script>
-/* unchanged logic + tiny eye toggle behaviour */
+/* unchanged logic + tiny eye toggle behaviour; default state = VISIBLE */
 const PASSWORD='bhootkimaakichut';
 const pw=document.getElementById('pw');
 const btn=document.getElementById('openBtn');
@@ -164,7 +165,7 @@ const preReveal=document.getElementById('preReveal');
 const eyeBtn=document.getElementById('eyeBtn');
 const eyeIcon=document.getElementById('eyeIcon');
 
-let eyeVisible=false;
+let eyeVisible=true; // <<< default VISIBLE now
 
 const EYE_OPEN = `
   <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
@@ -176,17 +177,24 @@ const EYE_SLASH = `
   <path d="M2 12s4-7 10-7c2.04 0 3.92.48 5.5 1.32" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M21.47 16.11A15.95 15.95 0 0 0 22 12s-4 7-10 7a10.94 10.94 0 0 1-4.5-.9" stroke="#7a2a3a" stroke-linecap="round" stroke-linejoin="round"/>
 `;
-eyeIcon.innerHTML=EYE_SLASH;
 
+/* initialize: password visible, show eye-open icon */
+eyeIcon.innerHTML=EYE_OPEN;
+pw.type = 'text';
+eyeBtn.setAttribute('aria-pressed','true');
+
+/* toggle */
 eyeBtn.addEventListener('click',(e)=>{
   e.preventDefault();
-  eyeVisible=!eyeVisible;
+  eyeVisible = !eyeVisible;
   if(eyeVisible){
     pw.type='text';
     eyeIcon.innerHTML=EYE_OPEN;
-  }else{
+    eyeBtn.setAttribute('aria-pressed','true');
+  } else {
     pw.type='password';
     eyeIcon.innerHTML=EYE_SLASH;
+    eyeBtn.setAttribute('aria-pressed','false');
   }
 });
 
